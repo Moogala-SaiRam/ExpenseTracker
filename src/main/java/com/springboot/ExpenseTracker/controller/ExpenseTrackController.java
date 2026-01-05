@@ -3,6 +3,8 @@ package com.springboot.ExpenseTracker.controller;
 import com.springboot.ExpenseTracker.service.ExpenseTrackService;
 import com.springboot.ExpenseTracker.model.ExpenseTrack;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,27 +21,32 @@ public class ExpenseTrackController {
     }
 
     @GetMapping("/expenses")
-    public List<ExpenseTrack> getExpenses(){
-        return service.getAllExpenses();
+    public ResponseEntity<List<ExpenseTrack>> getExpenses(){
+        return new ResponseEntity<>(service.getAllExpenses(), HttpStatus.OK);
     }
 
     @GetMapping("/expense/{id}")
-    public ExpenseTrack getById(@PathVariable int id){
-        return service.getById(id);
+    public ResponseEntity<ExpenseTrack> getById(@PathVariable int id){
+        ExpenseTrack track = service.getById(id);;
+        if(track != null){
+            return new ResponseEntity<>(track,HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(track,HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/expense")
-    public ExpenseTrack addExpenses(@RequestBody ExpenseTrack expenseTrack){
-        return service.addOrUpdateExpense(expenseTrack);
+    public ResponseEntity<ExpenseTrack> addExpenses(@RequestBody ExpenseTrack expenseTrack){
+        return new ResponseEntity<>(service.addOrUpdateExpense(expenseTrack),HttpStatus.CREATED);
     }
 
     @PutMapping("/expense/{id}")
-    public ExpenseTrack updateExpenses(@RequestBody ExpenseTrack expenseTrack,@PathVariable("id") int id){
-        return service.addOrUpdateExpense(expenseTrack);
+    public ResponseEntity<ExpenseTrack> updateExpenses(@RequestBody ExpenseTrack expenseTrack,@PathVariable("id") int id){
+        return new ResponseEntity<>(service.addOrUpdateExpense(expenseTrack),HttpStatus.OK);
     }
     @DeleteMapping("/expense/{id}")
-    public String deleteExpense(@PathVariable int id){
-        return service.deleteExpense(id);
+    public ResponseEntity<String> deleteExpense(@PathVariable int id){
+        return new ResponseEntity<>(service.deleteExpense(id),HttpStatus.OK);
     }
 
 }
