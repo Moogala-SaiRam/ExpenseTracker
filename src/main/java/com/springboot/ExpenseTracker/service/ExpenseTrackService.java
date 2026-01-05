@@ -1,5 +1,7 @@
-package com.springboot.ExpenseTracker;
+package com.springboot.ExpenseTracker.service;
 
+import com.springboot.ExpenseTracker.model.ExpenseTrack;
+import com.springboot.ExpenseTracker.repo.ExpenseTrackRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,11 @@ public class ExpenseTrackService {
     public List<ExpenseTrack> getAllExpenses() {
         return repo.findAll();
     }
+    public ExpenseTrack getById(int id) {
+        return repo.findById(id).orElse(null);
+    }
 
-    public ExpenseTrack addExpense(ExpenseTrack expenseTrack) {
+    public ExpenseTrack addOrUpdateExpense(ExpenseTrack expenseTrack) {
         ExpenseTrack track = new ExpenseTrack();
         track.setId(expenseTrack.getId());
         track.setAmount(expenseTrack.getAmount());
@@ -23,5 +28,11 @@ public class ExpenseTrackService {
         track.setDescription(expenseTrack.getDescription());
         repo.save(track);
         return track;
+    }
+
+
+    public String deleteExpense(int id) {
+        repo.deleteById(id);
+        return "Deleted";
     }
 }

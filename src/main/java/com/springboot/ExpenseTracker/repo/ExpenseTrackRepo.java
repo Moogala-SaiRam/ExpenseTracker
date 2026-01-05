@@ -1,5 +1,6 @@
-package com.springboot.ExpenseTracker;
+package com.springboot.ExpenseTracker.repo;
 
+import com.springboot.ExpenseTracker.model.ExpenseTrack;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
