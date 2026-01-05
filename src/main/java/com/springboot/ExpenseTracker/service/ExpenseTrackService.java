@@ -5,6 +5,8 @@ import com.springboot.ExpenseTracker.repo.ExpenseTrackRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,5 +36,21 @@ public class ExpenseTrackService {
     public String deleteExpense(int id) {
         repo.deleteById(id);
         return "Deleted";
+    }
+
+    public List<ExpenseTrack> searchByKey(String keyword) {
+        return repo.findByDescriptionContaining(keyword);
+    }
+
+    public List<ExpenseTrack> saveAll(List<ExpenseTrack> expenses) {
+        return repo.saveAll(expenses);
+    }
+
+    public List<ExpenseTrack> searchBetweenDate(LocalDate from, LocalDate to) {
+        return repo.findByDateBetween(from,to);
+    }
+
+    public List<ExpenseTrack> searchByDate(LocalDate date) {
+        return repo.findByDate(date);
     }
 }
