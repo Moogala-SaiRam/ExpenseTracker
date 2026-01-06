@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -39,26 +37,52 @@ public class ExpenseTrackController {
         }
     }
     @GetMapping("/expenses/search")
-    public ResponseEntity<List<ExpenseTrack>> searchByKeyword(@RequestParam String keyword){
-        return new ResponseEntity<>(service.searchByKey(keyword),HttpStatus.OK);
+    public ResponseEntity<?> searchByKeyword(@RequestParam String keyword){
+        List<ExpenseTrack> searchList = null;
+        try {
+            searchList = service.searchByKey(keyword);
+            return new ResponseEntity<>(searchList,HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @GetMapping("/expenses/search/betweenDates")
-    public ResponseEntity<List<ExpenseTrack>> searchByDate(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy")
+    public ResponseEntity<?> searchByDate(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy")
                                                                LocalDate from,
                                                            @RequestParam(required = false)
                                                            @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate to){
-        return new ResponseEntity<>(service.searchBetweenDate(from,to),HttpStatus.OK);
+        List<ExpenseTrack> searchList = null;
+        try {
+            searchList = service.searchBetweenDate(from,to);
+            return new ResponseEntity<>(searchList,HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/expenses/search/date")
-    public ResponseEntity<List<ExpenseTrack>> searchByDate(@RequestParam(required = false)
+    public ResponseEntity<?> searchByDate(@RequestParam(required = false)
                                                                @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate date){
-        return new ResponseEntity<>(service.searchByDate(date),HttpStatus.OK);
+        List<ExpenseTrack> searchList = null;
+        try {
+            searchList = service.searchByDate(date);
+            return new ResponseEntity<>(searchList,HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
     @PostMapping("/expense")
-    public ResponseEntity<ExpenseTrack> addExpenses(@RequestBody ExpenseTrack expenseTrack){
-        return new ResponseEntity<>(service.addOrUpdateExpense(expenseTrack),HttpStatus.CREATED);
+    public ResponseEntity<?> addExpenses(@RequestBody ExpenseTrack expenseTrack){
+        ExpenseTrack track = null;
+        try{
+            track = service.addOrUpdateExpense(expenseTrack);
+            return new ResponseEntity<>(track,HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/expenses/bulk")
@@ -66,14 +90,24 @@ public class ExpenseTrackController {
         return new ResponseEntity<>(service.saveAll(expenses),HttpStatus.OK);
     }
     @PutMapping("/expense/{id}")
-    public ResponseEntity<ExpenseTrack> updateExpenses(@RequestBody ExpenseTrack expenseTrack,@PathVariable("id") int id){
-        return new ResponseEntity<>(service.addOrUpdateExpense(expenseTrack),HttpStatus.OK);
+    public ResponseEntity<?> updateExpenses(@RequestBody ExpenseTrack expenseTrack,@PathVariable("id") int id){
+        ExpenseTrack track = null;
+        try{
+            track = service.updateById(expenseTrack,id);
+            return new ResponseEntity<>(track,HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
     @DeleteMapping("/expense/{id}")
     public ResponseEntity<String> deleteExpense(@PathVariable int id){
-        return new ResponseEntity<>(service.deleteExpense(id),HttpStatus.OK);
+        try{
+            return new ResponseEntity<>(service.deleteExpense(id),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
+        }
     }
-
 
 
 }
