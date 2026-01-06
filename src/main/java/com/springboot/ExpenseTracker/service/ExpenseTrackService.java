@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,5 +51,13 @@ public class ExpenseTrackService {
 
     public List<ExpenseTrack> searchByDate(LocalDate date) {
         return repo.findByDate(date);
+    }
+    public ExpenseTrack updateById(ExpenseTrack expenseTrack,int id){
+        ExpenseTrack track = repo.findById(id).get();
+        track.setAmount(expenseTrack.getAmount());
+        track.setDate(expenseTrack.getDate());
+        track.setDescription(expenseTrack.getDescription());
+        repo.save(track);
+        return track;
     }
 }
