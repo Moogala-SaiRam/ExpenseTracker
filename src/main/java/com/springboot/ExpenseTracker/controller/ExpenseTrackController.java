@@ -1,5 +1,7 @@
 package com.springboot.ExpenseTracker.controller;
 
+import com.springboot.ExpenseTracker.model.dto.ExpenseRequestDTO;
+import com.springboot.ExpenseTracker.model.dto.ExpenseResponseDTO;
 import com.springboot.ExpenseTracker.service.ExpenseTrackService;
 import com.springboot.ExpenseTracker.model.ExpenseTrack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +25,23 @@ public class ExpenseTrackController {
     }
 
     @GetMapping("/expenses")
-    public ResponseEntity<List<ExpenseTrack>> getExpenses(){
+    public ResponseEntity<List<ExpenseResponseDTO>> getExpenses(){
         return new ResponseEntity<>(service.getAllExpenses(), HttpStatus.OK);
     }
 
     @GetMapping("/expense/{id}")
-    public ResponseEntity<ExpenseTrack> getById(@PathVariable int id){
-        ExpenseTrack track = service.getById(id);;
-        if(track != null){
-            return new ResponseEntity<>(track,HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(track,HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getById(@PathVariable int id){
+        ExpenseResponseDTO responseDTO = null;
+        try{
+            responseDTO = service.getById(id);
+            return new ResponseEntity<>(responseDTO,HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
     @GetMapping("/expenses/search")
     public ResponseEntity<?> searchByKeyword(@RequestParam String keyword){
-        List<ExpenseTrack> searchList = null;
+        List<ExpenseResponseDTO> searchList = null;
         try {
             searchList = service.searchByKey(keyword);
             return new ResponseEntity<>(searchList,HttpStatus.OK);
@@ -53,7 +56,7 @@ public class ExpenseTrackController {
                                                                LocalDate from,
                                                            @RequestParam(required = false)
                                                            @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate to){
-        List<ExpenseTrack> searchList = null;
+        List<ExpenseResponseDTO> searchList = null;
         try {
             searchList = service.searchBetweenDate(from,to);
             return new ResponseEntity<>(searchList,HttpStatus.OK);
@@ -65,21 +68,28 @@ public class ExpenseTrackController {
     @GetMapping("/expenses/search/date")
     public ResponseEntity<?> searchByDate(@RequestParam(required = false)
                                                                @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate date){
-        List<ExpenseTrack> searchList = null;
+        List<ExpenseResponseDTO> searchList = null;
         try {
             searchList = service.searchByDate(date);
+            if(searchList.isEmpty()){
+                throw new NullPointerException();
+            }
             return new ResponseEntity<>(searchList,HttpStatus.OK);
-        }catch(Exception e){
+
+        }catch (NullPointerException ne){
+            return new ResponseEntity<>(ne.getMessage(),HttpStatus.NOT_FOUND);
+        }
+        catch(Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
     @PostMapping("/expense")
-    public ResponseEntity<?> addExpenses(@RequestBody ExpenseTrack expenseTrack){
-        ExpenseTrack track = null;
+    public ResponseEntity<?> addExpenses(@RequestBody ExpenseRequestDTO expenseRequest){
+        ExpenseResponseDTO responseDTO = null;
         try{
-            track = service.addOrUpdateExpense(expenseTrack);
-            return new ResponseEntity<>(track,HttpStatus.CREATED);
+            responseDTO = service.addExpense(expenseRequest);
+            return new ResponseEntity<>(responseDTO,HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -90,11 +100,11 @@ public class ExpenseTrackController {
         return new ResponseEntity<>(service.saveAll(expenses),HttpStatus.OK);
     }
     @PutMapping("/expense/{id}")
-    public ResponseEntity<?> updateExpenses(@RequestBody ExpenseTrack expenseTrack,@PathVariable("id") int id){
-        ExpenseTrack track = null;
+    public ResponseEntity<?> updateExpenses(@RequestBody ExpenseRequestDTO requestDTO,@PathVariable("id") int id){
+        ExpenseResponseDTO  responseDTO = null;
         try{
-            track = service.updateById(expenseTrack,id);
-            return new ResponseEntity<>(track,HttpStatus.OK);
+            responseDTO = service.updateById(requestDTO,id);
+            return new ResponseEntity<>(responseDTO,HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
